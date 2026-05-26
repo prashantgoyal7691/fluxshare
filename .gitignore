@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# uploads
+server/uploads/
+
+# env files
+.env
+client/.env
+server/.env
+
+# next build
+client/.next/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# vscode
+.vscode
+
+# build files
+dist/
+coverage/

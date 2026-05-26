@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+
+# uploads
+/uploads
+
+# environment variables
+.env
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+
+# temporary files
+*.tmp
+*.temp
+
+# coverage
+/coverage
+
+# build
+/dist
+
+# vscode
+.vscode

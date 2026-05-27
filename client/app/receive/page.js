@@ -29,7 +29,7 @@ export default function ReceivePage({ initialKey = "" }) {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5002/api/files/info/${transferKey}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/files/info/${transferKey}`,
       );
 
       const data = await response.json();
@@ -53,9 +53,10 @@ export default function ReceivePage({ initialKey = "" }) {
   };
 
   const handleDownload = async () => {
+    setLoading(true);
     try {
       window.open(
-        `http://localhost:5002/api/files/download/${transferInfo.key}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/files/download/${transferInfo.key}`,
         "_blank",
       );
 
@@ -65,6 +66,7 @@ export default function ReceivePage({ initialKey = "" }) {
 
       setTimeout(() => {
         fetchTransferInfo(transferInfo.key);
+        setLoading(false);
       }, 1200);
     } catch (error) {
       toast.error("Download failed");
@@ -94,7 +96,10 @@ export default function ReceivePage({ initialKey = "" }) {
               type="text"
               placeholder="Enter Secret Key"
               value={key}
-              onChange={(e) => setKey(e.target.value)}
+              onChange={(e) => {
+                setKey(e.target.value);
+                setTransferInfo(null);
+              }}
               className="w-full bg-transparent text-xl font-medium tracking-[0.12em] text-white outline-none placeholder:text-gray-500"
             />
           </div>
@@ -141,7 +146,10 @@ export default function ReceivePage({ initialKey = "" }) {
             </div>
 
             <button
-              disabled={transferInfo.downloadCount >= transferInfo.maxDownloads}
+              disabled={
+                loading ||
+                transferInfo.downloadCount >= transferInfo.maxDownloads
+              }
               onClick={handleDownload}
               className="mt-6 w-full rounded-2xl bg-white py-4 text-lg font-semibold text-black transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed
               disabled:opacity-50"

@@ -18,8 +18,6 @@ export default function Home() {
   useEffect(() => {
     const tab = searchParams.get("tab");
 
-    const key = searchParams.get("key");
-
     if (tab === "receive") {
       setActiveTab("receive");
 

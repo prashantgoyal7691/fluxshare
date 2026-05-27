@@ -31,7 +31,7 @@ export default function UploadPage() {
   const [maxDownloads, setMaxDownloads] = useState(10);
 
   const shareLink = uploadData
-    ? `http://localhost:3000/transfer/${uploadData.key}`
+    ? `${window.location.origin}/transfer/${uploadData.key}`
     : "";
 
   // DROP SUPPORT
@@ -107,7 +107,7 @@ export default function UploadPage() {
       formData.append("maxDownloads", maxDownloads);
 
       const response = await axios.post(
-        "http://localhost:5002/api/files/upload",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/files/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -366,6 +366,7 @@ export default function UploadPage() {
                 <Copy size={18} />
                 Copy Link
               </button>
+              <p className="mb-4 break-all text-sm text-white">{shareLink}</p>
             </div>
           </div>
         </div>

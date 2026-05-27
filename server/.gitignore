@@ -1,11 +1,14 @@
 # dependencies
 /node_modules
 
-# uploads
-/uploads
+uploads/*
+!uploads/.gitkeep
 
 # environment variables
 .env
+.env.local
+.env.development
+.env.production
 
 # logs
 npm-debug.log*

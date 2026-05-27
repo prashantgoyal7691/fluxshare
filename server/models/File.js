@@ -18,8 +18,22 @@ const fileSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      s3Key: {
+        type: String,
+        required: true,
+      },
     },
   ],
+  
+  maxDownloads: {
+    type: Number,
+    default: 10,
+  },
+
+  downloadCount: {
+    type: Number,
+    default: 0,
+  },
 
   expiresAt: {
     type: Date,

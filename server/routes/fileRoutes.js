@@ -1,11 +1,14 @@
 const express = require("express");
-const router = express.Router();
 const archiver = require("archiver");
+const router = express.Router();
 
 const upload = require("../middleware/upload");
 const File = require("../models/File");
 
 const { v4: uuidv4 } = require("uuid");
+const { GetObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 router.post("/upload", upload.array("files"), async (req, res) => {
   try {
@@ -13,7 +16,8 @@ router.post("/upload", upload.array("files"), async (req, res) => {
 
     const uploadedFiles = req.files.map((file) => ({
       fileName: file.originalname,
-      filePath: file.path,
+      filePath: file.location,
+      s3Key: file.key,
     }));
 
     const expiryMinutes = Number(req.body.expiry) || 5;
@@ -106,10 +110,8 @@ router.get("/info/:key", async (req, res) => {
   }
 });
 
-
 router.get("/download/:key", async (req, res) => {
   try {
-
     // FIND FILE
 
     const fileData = await File.findOne({
@@ -132,70 +134,85 @@ router.get("/download/:key", async (req, res) => {
       });
     }
 
-    // CHECK DOWNLOAD LIMIT
+    // ATOMIC DOWNLOAD COUNT UPDATE
 
-    if (
-      fileData.downloadCount >=
-      fileData.maxDownloads
-    ) {
+    const updatedFile = await File.findOneAndUpdate(
+      {
+        key: req.params.key,
+
+        downloadCount: {
+          $lt: fileData.maxDownloads,
+        },
+      },
+      {
+        $inc: {
+          downloadCount: 1,
+        },
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!updatedFile) {
       return res.status(403).json({
         success: false,
         message: "Maximum download limit reached",
       });
     }
 
-    // INCREMENT DOWNLOAD COUNT
-
-    fileData.downloadCount += 1;
-
-    await fileData.save();
-
     // CHECK FILES
 
-    if (
-      !fileData.files ||
-      fileData.files.length === 0
-    ) {
+    if (!updatedFile.files || updatedFile.files.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Files not found",
       });
     }
 
-    // ZIP RESPONSE
+    if (updatedFile.files.length === 1) {
+      const command = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
 
-    res.attachment(`${fileData.key}.zip`);
+        Key: updatedFile.files[0].s3Key,
+      });
+
+      const signedUrl = await getSignedUrl(s3, command, {
+        expiresIn: 60,
+      });
+
+      return res.redirect(signedUrl);
+    }
+
+    // Stream multiple S3 files into a ZIP
+    res.attachment(`${updatedFile.key}.zip`);
 
     const archive = archiver("zip", {
       zlib: { level: 9 },
     });
 
+    archive.on("error", (error) => {
+      console.log(error.message);
+      res.status(500).end();
+    });
+
     archive.pipe(res);
 
-    // ADD FILES TO ZIP
+    for (const file of updatedFile.files) {
+      const command = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: file.s3Key,
+      });
 
-    for (const file of fileData.files) {
+      const response = await s3.send(command);
 
-      archive.file(file.filePath, {
+      archive.append(response.Body, {
         name: file.fileName,
       });
     }
 
-    // ZIP ERROR
-
-    archive.on("error", (error) => {
-
-      console.log(error.message);
-
-      res.status(500).end();
-    });
-
-    // FINALIZE ZIP
-
     await archive.finalize();
-
   } catch (error) {
-
     console.log(error.message);
 
     res.status(500).json({

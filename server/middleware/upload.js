@@ -1,21 +1,23 @@
 const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+const multerS3 = require("multer-s3");
+const s3 = require("../config/s3");
 
 const upload = multer({
-  storage,
+  storage: multerS3({
+    s3,
 
-  limits: {
-    fileSize: 1024 * 1024 * 2048,
-  },
+    bucket: process.env.AWS_BUCKET_NAME,
+    
+    limits: {
+      fileSize: 1024 * 1024 * 500,
+    },
+
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+
+    key: function (req, file, cb) {
+      cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`);
+    },
+  }),
 });
 
 module.exports = upload;

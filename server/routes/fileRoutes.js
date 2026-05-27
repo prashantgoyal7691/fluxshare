@@ -37,6 +37,8 @@ router.post("/upload", upload.array("files"), async (req, res) => {
       success: true,
       key,
       expiresAt: newFile.expiresAt,
+      totalFiles: uploadedFiles.length,
+      maxDownloads,
     });
   } catch (error) {
     console.log(error.message);
@@ -90,6 +92,7 @@ router.get("/info/:key", async (req, res) => {
 
       files: fileData.files.map((file) => ({
         fileName: file.fileName,
+        fileSize: file.fileSize || null,
       })),
 
       totalFiles: fileData.files.length,
@@ -175,10 +178,11 @@ router.get("/download/:key", async (req, res) => {
         Bucket: process.env.AWS_BUCKET_NAME,
 
         Key: updatedFile.files[0].s3Key,
+        ResponseContentDisposition: `attachment; filename="${updatedFile.files[0].fileName}"`,
       });
 
       const signedUrl = await getSignedUrl(s3, command, {
-        expiresIn: 60,
+        expiresIn: 120,
       });
 
       return res.redirect(signedUrl);
@@ -199,16 +203,21 @@ router.get("/download/:key", async (req, res) => {
     archive.pipe(res);
 
     for (const file of updatedFile.files) {
-      const command = new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: file.s3Key,
-      });
+      try {
+        const command = new GetObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: file.s3Key,
+        });
 
-      const response = await s3.send(command);
+        const response = await s3.send(command);
 
-      archive.append(response.Body, {
-        name: file.fileName,
-      });
+        archive.append(response.Body, {
+          name: file.fileName,
+        });
+      } catch (error) {
+        console.log(`Failed to stream file: ${file.fileName}`);
+        console.log(error.message);
+      }
     }
 
     await archive.finalize();

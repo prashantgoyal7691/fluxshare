@@ -77,17 +77,17 @@ export default function ReceivePage({ initialKey = "" }) {
     <div className="flex h-full items-center justify-center">
       {/* RECEIVE WORKSPACE */}
 
-      <div className="relative flex w-full h-full min-h-[460px] flex-col items-center justify-center rounded-[36px] border border-dashed border-white/10 bg-white/[0.04] px-10 text-center backdrop-blur-2xl transition-all duration-300">
+      <div className="relative flex h-full min-h-[460px] w-full flex-col items-center justify-center rounded-[28px] border border-dashed border-white/10 bg-white/[0.04] px-5 text-center backdrop-blur-2xl transition-all duration-300 sm:px-8 md:rounded-[36px] md:px-10">
         {/* ICON */}
 
-        <div className="mb-10 rounded-full border border-white/10 bg-white/10 p-7 text-white backdrop-blur-xl">
+        <div className="mb-8 rounded-full border border-white/10 bg-white/10 p-5 text-white backdrop-blur-xl md:mb-10 md:p-7">
           <FileArchive size={70} />
         </div>
 
         {/* INPUT */}
 
         <div className="w-full max-w-xl">
-          <div className="flex items-center gap-4 rounded-[24px] border border-white/10 bg-white/10 px-6 py-5 backdrop-blur-2xl transition-all duration-300 focus-within:border-white/30 focus-within:bg-white/15">
+          <div className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-2xl transition-all duration-300 focus-within:border-white/30 focus-within:bg-white/15 sm:px-6 sm:py-5 md:rounded-[24px]">
             <div className="text-gray-400">
               <KeyRound size={28} />
             </div>
@@ -100,7 +100,7 @@ export default function ReceivePage({ initialKey = "" }) {
                 setKey(e.target.value);
                 setTransferInfo(null);
               }}
-              className="w-full bg-transparent text-xl font-medium tracking-[0.12em] text-white outline-none placeholder:text-gray-500"
+              className="w-full bg-transparent text-base font-medium tracking-[0.08em] text-white outline-none placeholder:text-gray-500 sm:text-xl sm:tracking-[0.12em]"
             />
           </div>
         </div>
@@ -109,14 +109,14 @@ export default function ReceivePage({ initialKey = "" }) {
 
         <button
           onClick={() => fetchTransferInfo()}
-          className="mt-8 flex w-full max-w-xl items-center justify-center gap-3 rounded-2xl bg-white px-10 py-5 text-lg font-semibold text-black transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="mt-8 flex w-full max-w-xl items-center justify-center gap-3 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-black transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] sm:px-10 sm:py-5 sm:text-lg"
         >
           <Download size={24} />
           {loading ? "Checking Transfer..." : "Check Transfer"}
         </button>
 
         {transferInfo && (
-          <div className="mt-8 w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-6 text-left">
+          <div className="mt-8 w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-4 text-left sm:p-6">
             <div className="mb-5">
               <h3 className="text-2xl font-semibold text-white">
                 Transfer Ready

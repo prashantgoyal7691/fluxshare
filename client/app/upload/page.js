@@ -185,12 +185,12 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-4">
       {/* DROP ZONE */}
 
       <div
         {...getRootProps()}
-        className={`relative flex min-h-[420px] cursor-pointer flex-col items-center justify-center rounded-[40px] border border-dashed transition-all duration-300
+        className={`relative flex min-h-[260px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[28px] border border-dashed transition-all duration-300 md:min-h-[420px] md:rounded-[40px]
         ${
           isDragActive
             ? "border-blue-400 bg-blue-500/10"
@@ -198,17 +198,14 @@ export default function UploadPage() {
         }`}
       >
         <input {...getInputProps()} />
-
-        <div className="flex flex-col items-center text-center px-10">
+        <div className="flex flex-col items-center px-5 text-center md:px-10">
           <div className="mb-8 text-white/80">{renderFileIcon()}</div>
-
           {files.length === 0 ? (
             <>
-              <h3 className="text-4xl font-semibold">
+              <h3 className="text-2xl font-semibold sm:text-4xl">
                 Drop or paste files here
               </h3>
-
-              <p className="mt-5 max-w-2xl text-lg text-gray-400">
+              <p className="mt-4 max-w-2xl text-sm text-gray-400 sm:text-lg">
                 Drag & drop files, folders, videos, screenshots or paste content
                 with CMD + V.
               </p>
@@ -219,7 +216,6 @@ export default function UploadPage() {
                 <h3 className="text-3xl font-semibold">
                   {files.length} Files Selected
                 </h3>
-
                 <p className="mt-3 text-gray-400">
                   {(
                     files.reduce((acc, file) => acc + file.size, 0) /
@@ -229,24 +225,21 @@ export default function UploadPage() {
                   MB Total
                 </p>
               </div>
-
-              <div className="max-h-[250px] space-y-3 overflow-y-auto pr-2">
+              <div className="max-h-[220px] space-y-3 overflow-y-auto pr-2 md:max-h-[280px]">
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-4"
+                    className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4"
                   >
-                    <div className="overflow-hidden">
-                      <p className="truncate text-lg font-medium text-white">
+                    <div className="w-full overflow-hidden text-left">
+                      <p className="truncate text-sm font-medium text-white sm:text-lg">
                         {file.name}
                       </p>
-
                       <p className="mt-1 text-sm text-gray-400">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
-
-                    <div className="text-sm text-gray-500">
+                    <div className="break-all text-xs text-gray-500 sm:text-sm">
                       {file.type || "Unknown"}
                     </div>
                   </div>
@@ -278,7 +271,7 @@ export default function UploadPage() {
             Maximum Downloads
           </label>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[1, 5, 10, 25].map((value) => (
               <button
                 key={value}
@@ -338,11 +331,10 @@ export default function UploadPage() {
             Share this key with anyone to receive the uploaded files.
           </p>
 
-          <div className="flex items-center gap-4">
-            <div className="flex-1 rounded-2xl bg-white/10 px-6 py-5 text-3xl font-bold tracking-[0.3em]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="w-full break-all rounded-2xl bg-white/10 px-4 py-4 text-center text-xl font-bold tracking-[0.18em] sm:flex-1 sm:px-6 sm:py-5 sm:text-3xl sm:tracking-[0.3em]">
               {uploadData.key}
             </div>
-
             <button
               onClick={copyKey}
               className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 hover:scale-105 ${
@@ -355,7 +347,7 @@ export default function UploadPage() {
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
             <p className="mb-2 text-sm text-gray-400">Shareable Link</p>
 
-            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(shareLink);
@@ -366,7 +358,7 @@ export default function UploadPage() {
                 <Copy size={18} />
                 Copy Link
               </button>
-              <p className="mb-4 break-all text-sm text-white">{shareLink}</p>
+              <p className="col-span-full break-all text-xs text-white sm:text-sm">{shareLink}</p>
             </div>
           </div>
         </div>

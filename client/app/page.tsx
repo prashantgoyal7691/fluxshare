@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import UploadPage from "./upload/page";
 import ReceivePage from "./receive/page";
@@ -9,7 +9,7 @@ import { ArrowUpRight, ArrowDownLeft, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
-export default function Home() {
+function HomeContent() {
   const [activeTab, setActiveTab] = useState("send");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -206,5 +206,13 @@ export default function Home() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

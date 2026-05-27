@@ -1,4 +1,3 @@
-
 "use client";
 export const dynamic = "force-dynamic";
 
@@ -9,23 +8,25 @@ import ReceivePage from "./receive/page";
 
 import { ArrowUpRight, ArrowDownLeft, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 
 function HomeContent() {
   const [activeTab, setActiveTab] = useState("send");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const searchParams = useSearchParams();
+  const [initialKey, setInitialKey] = useState("");
 
   useEffect(() => {
-    const tab = searchParams.get("tab");
-
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    const key = params.get("key");
+    if (key) {
+      setInitialKey(key);
+    }
     if (tab === "receive") {
       setActiveTab("receive");
-
       setIsModalOpen(true);
     }
-  }, [searchParams]);
+  }, []);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -198,7 +199,7 @@ function HomeContent() {
                       }}
                       className="h-full"
                     >
-                      <ReceivePage initialKey={searchParams.get("key") || ""} />
+                      <ReceivePage initialKey={initialKey} />
                     </motion.div>
                   )}
                 </AnimatePresence>

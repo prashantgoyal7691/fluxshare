@@ -239,14 +239,7 @@ Example Production Setup:
 
 ```bash
 Frontend → fluxshare.p19.in
-Backend  → api.p19.in
 ```
-
----
-
-# 📸 Screenshots
-
-(Add screenshots here)
 
 ---
 

@@ -568,7 +568,6 @@ The Node.js/Express backend can be deployed using:
 - AWS S3
 - Redis
 
----
 
 # 🌐 Production Example
 

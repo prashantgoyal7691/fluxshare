@@ -1,52 +1,99 @@
 const cron = require("node-cron");
 
 const File = require("../models/File");
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
-const s3 = require("../config/s3");
+const {
+  deleteFile,
+} = require("../services/storageService");
+
+const {
+  deleteTransfer,
+} = require("../services/cacheService");
 
 cron.schedule("* * * * *", async () => {
   try {
-    console.log("Checking expired files...");
-    const expiredFiles = await File.find({
+    console.log("Checking expired transfers...");
+
+    const expiredTransfers = await File.find({
       expiresAt: { $lt: new Date() },
     });
-    for (const file of expiredFiles) {
-      try {
-        if (file.files && file.files.length > 0) {
-          for (const uploadedFile of file.files) {
-            if (!uploadedFile.s3Key) {
-              console.log(`Missing s3Key for file: ${uploadedFile.fileName}`);
 
+    for (const transfer of expiredTransfers) {
+      try {
+        let allS3Deleted = true;
+
+        if (
+          transfer.files &&
+          transfer.files.length > 0
+        ) {
+          for (const file of transfer.files) {
+            if (!file.s3Key) {
+              console.log(
+                `Missing s3Key for file: ${file.fileName}`,
+              );
+
+              allS3Deleted = false;
               continue;
             }
 
             try {
-              await s3.send(
-                new DeleteObjectCommand({
-                  Bucket: process.env.AWS_BUCKET_NAME,
+              await deleteFile(file.s3Key);
 
-                  Key: uploadedFile.s3Key,
-                }),
+              console.log(
+                `Deleted S3 file: ${file.s3Key}`,
               );
-
-              console.log(`Deleted S3 file: ${uploadedFile.s3Key}`);
             } catch (error) {
-              console.log(`Failed to delete S3 file: ${uploadedFile.s3Key}`);
+              allS3Deleted = false;
+
+              console.log(
+                `Failed to delete S3 file: ${file.s3Key}`,
+              );
 
               console.log(error.message);
             }
           }
         }
 
-        await File.deleteOne({ _id: file._id });
+        if (!allS3Deleted) {
+          console.log(
+            `Skipping database deletion for transfer: ${transfer.key}`,
+          );
 
-        console.log(`Deleted expired transfer: ${file.key}`);
+          continue;
+        }
+
+        try {
+          await deleteTransfer(transfer.key);
+
+          console.log(
+            `Deleted Redis cache for transfer: ${transfer.key}`,
+          );
+        } catch (error) {
+          console.log(
+            `Failed to delete Redis cache for transfer: ${transfer.key}`,
+          );
+
+          console.log(error.message);
+        }
+
+        await File.deleteOne({
+          _id: transfer._id,
+        });
+
+        console.log(
+          `Deleted expired transfer: ${transfer.key}`,
+        );
       } catch (error) {
-        console.log("File deletion error:", error.message);
+        console.log(
+          `Transfer cleanup error (${transfer.key}):`,
+          error.message,
+        );
       }
     }
   } catch (error) {
-    console.log("Cron job error:", error.message);
+    console.log(
+      "Cleanup cron error:",
+      error.message,
+    );
   }
 });
